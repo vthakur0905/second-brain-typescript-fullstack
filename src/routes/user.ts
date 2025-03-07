@@ -8,8 +8,19 @@ const saltRounds = 10 ;
 const app = express();
 app.use(express.json());
 
+interface SignupRequestBody {
+  firstName: string;
+  lastName: string;
+  email: string;
+  username: string;
+  password: string;
+}
+
+
+
 function userRoutes(app: Application) {
-  // @ts-ignore
+  
+  //@ts-expect-error
   app.post("/signup", async (req: Request, res: Response) => {
     try {
       const validatedData = signupValidation.parse(req.body);
@@ -64,8 +75,10 @@ function userRoutes(app: Application) {
     }
   });
 
+
+
   app.post("/signin", (req: Request, res: Response) => {
-    res.send("sign in route");
+    const validatedData
   });
 
   app.post("/content", (req: Request, res: Response) => {
