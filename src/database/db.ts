@@ -1,8 +1,5 @@
 import mongoose, { MongooseError } from "mongoose";
 
-mongoose.connect("mongodb+srv://sample:123@cluster0.r2tts.mongodb.net/secondBrainApp")
-.then(()=> console.log("connected in db.js"))
-
 
 const { Schema, Document } = mongoose;
 const ObjectId = mongoose.Types.ObjectId;

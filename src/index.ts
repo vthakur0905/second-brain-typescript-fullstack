@@ -14,18 +14,15 @@ userRoutes(app) ;
 
 async function startServer() {
     try {
-        await mongoose.connect("mongodb+srv://sample:123@cluster0.r2tts.mongodb.net/secondBrainApp")
-        .then(() => console.log("connected to db"))
-        .catch(err => console.error("connection to db failed : " + err))
-
-
+        await mongoose.connect("mongodb+srv://root:root@cluster0.yca2k.mongodb.net/secondBrainApp")
+        
+        console.log("connected to db")
+        
         app.listen(port , () => {
             console.log(`app is running on port : ${port}`) ;
         })
-        
-        
+         
     }
-
     catch(err) {
         console.error(`failed to connect - ${String(err)}`)
     }

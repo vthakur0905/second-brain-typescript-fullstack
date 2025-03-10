@@ -3,25 +3,17 @@ import { userModel } from "../database/db";
 import { signupValidation } from "../middlware/validationMiddleware/signupValidation";
 import { ZodError } from "zod";
 import bcrypt from "bcrypt" ;
+import { signinValidation } from "../middlware/validationMiddleware/signinValidation";
 const saltRounds = 10 ;
 
 const app = express();
 app.use(express.json());
 
-interface SignupRequestBody {
-  firstName: string;
-  lastName: string;
-  email: string;
-  username: string;
-  password: string;
-}
-
-
 
 function userRoutes(app: Application) {
   
-  //@ts-expect-error
-  app.post("/signup", async (req: Request, res: Response) => {
+ 
+  app.post("/signup", async (req: Request, res: Response):Promise<any> => {
     try {
       const validatedData = signupValidation.parse(req.body);
       const { firstName, lastName, email, username, password } = validatedData;
@@ -34,11 +26,10 @@ function userRoutes(app: Application) {
         });
       }
 
-      async function hashPassword (password : string)
-      :Promise<string> {
+      async function hashPassword (password : string) :Promise<string> {
         
         try {
-            return await bcrypt.hash(password, saltRounds) ;
+          return await bcrypt.hash(password, saltRounds) ;
         }
         catch(err){
             console.error("error in hashing password in signup " + err) ;
@@ -69,16 +60,47 @@ function userRoutes(app: Application) {
           message: "failed to validate data",
         });
       }
+      console.log(err);
       return res.status(401).json({
-        message: "failed to load data",
+        
+        message: "failed to load data - here",
       });
     }
   });
 
 
 
-  app.post("/signin", (req: Request, res: Response) => {
-    const validatedData
+  app.post("/signin", async (req: Request, res: Response) : Promise<any> => {
+    const validatedData = signinValidation.parse(req.body) ; 
+    const {email, password} = validatedData ;
+
+    const checkEmail = await userModel.findOne({email}) ;
+
+    if (!checkEmail) {
+      return res.status(401).json({
+        message : "bad credentials"
+      })
+    }
+
+
+    const hashedPassword = checkEmail.password ;
+    console.log(hashedPassword) ;
+
+    bcrypt.compare(password , hashedPassword, (err, result)=> {
+      if (err) {
+        return res.status(401).json({
+          message : "bad credentials"
+        })
+      }
+
+      if(result) {
+        return res.status(401).json({
+          message : "logged in"
+        })
+      }
+    })
+
+    
   });
 
   app.post("/content", (req: Request, res: Response) => {
