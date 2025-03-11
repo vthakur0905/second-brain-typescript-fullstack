@@ -127,6 +127,24 @@ function userRoutes(app: Application) {
     
   });
 
+  app.post("/logout", (req:Request, res:Response):void => {
+    try {
+      res.clearCookie("token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict"
+      }) ;
+      res.status(200).json({
+        message : "logout success"
+      })
+    }catch(err){
+      console.error(err) ;
+      res.status(500).json({
+        message : "logout failed"
+      })
+    }
+  })
+
   app.post("/content", (req: Request, res: Response) => {
     res.send(" add content route");
   });
