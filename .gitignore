@@ -4,3 +4,7 @@ package-lock.json
 
 # build files
 dist/
+
+
+# environment variables
+.env

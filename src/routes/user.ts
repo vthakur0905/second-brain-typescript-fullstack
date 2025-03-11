@@ -4,10 +4,18 @@ import { signupValidation } from "../middlware/validationMiddleware/signupValida
 import { ZodError } from "zod";
 import bcrypt from "bcrypt" ;
 import { signinValidation } from "../middlware/validationMiddleware/signinValidation";
+import jwt from "jsonwebtoken";
+import cookieParser from "cookie-parser" ;
+import { SECRET_KEY } from "../config";
+import { authMiddleware } from "../middlware/authMiddleware/authMiddleware";
+
+
 const saltRounds = 10 ;
+
 
 const app = express();
 app.use(express.json());
+// app.use(cookieParser()) ;
 
 
 function userRoutes(app: Application) {
@@ -71,14 +79,16 @@ function userRoutes(app: Application) {
 
 
   app.post("/signin", async (req: Request, res: Response) : Promise<any> => {
-    const validatedData = signinValidation.parse(req.body) ; 
+    
+    try {
+      const validatedData = signinValidation.parse(req.body) ; 
     const {email, password} = validatedData ;
 
     const checkEmail = await userModel.findOne({email}) ;
 
     if (!checkEmail) {
       return res.status(401).json({
-        message : "bad credentials"
+        message : "email or password is wrong"
       })
     }
 
@@ -87,19 +97,33 @@ function userRoutes(app: Application) {
     console.log(hashedPassword) ;
 
     bcrypt.compare(password , hashedPassword, (err, result)=> {
-      if (err) {
+      if (err || !result) {
         return res.status(401).json({
           message : "bad credentials"
         })
       }
 
       if(result) {
-        return res.status(401).json({
-          message : "logged in"
+        const token = jwt.sign({email : email}, SECRET_KEY, {
+          expiresIn : "1h"
+        }) ;
+        res.cookie("token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict"
+        }) ;
+        return res.status(200).json({
+          message : "logged in successfully"
         })
+
       }
     })
-
+    }catch(Error) {
+      console.log(Error)
+      res.status(400).json({
+        message : "some error"
+      })
+    }
     
   });
 
@@ -107,8 +131,8 @@ function userRoutes(app: Application) {
     res.send(" add content route");
   });
 
-  app.get("/content", (req: Request, res: Response) => {
-    res.send("get all content route");
+  app.get("/content",authMiddleware, (req: Request, res: Response)=> {
+    res.send("get all content route after log in");
   });
 
   app.delete("/content", (req: Request, res: Response) => {

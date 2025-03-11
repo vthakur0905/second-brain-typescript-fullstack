@@ -2,11 +2,13 @@ import express , {Application , Request, Response} from "express" ;
 import { userRoutes } from "./routes/user";
 import mongoose from "mongoose";
 import "./database/db"
+import cookieParser from "cookie-parser";
 
 const app : Application = express() ;
 const port : number = 3000 ;
 
 app.use(express.json()) ;
+app.use(cookieParser()) ;
 
 userRoutes(app) ;
 
