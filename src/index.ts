@@ -13,7 +13,6 @@ app.use(cookieParser()) ;
 userRoutes(app) ;
 
 
-
 async function startServer() {
     try {
         await mongoose.connect("mongodb+srv://root:root@cluster0.yca2k.mongodb.net/secondBrainApp")
