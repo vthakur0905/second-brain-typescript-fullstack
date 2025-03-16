@@ -1,4 +1,5 @@
 import express, { Application, Router, Request, Response, NextFunction } from "express";
+import mongoose , {Types} from "mongoose";
 import { contentModel, userModel } from "../database/db";
 import { signupValidation } from "../middlware/validationMiddleware/signupValidation";
 import { ZodError } from "zod";
@@ -197,8 +198,39 @@ function userRoutes(app: Application) {
     
   });
 
-  app.delete("/content", (req: Request, res: Response) => {
-    res.send("delete a content");
+  app.delete("/content/:id",authMiddleware, async (req: Request, res: Response) : Promise<any> => {
+    
+    const email = (req as any).email ;
+    console.log("email : " + email)
+
+    const {id} = req.params; 
+    console.log("id : " + id)
+
+    const content = await contentModel.findOne({
+      _id : new Types.ObjectId(id) ,
+      email 
+    }) ;
+
+    if (!content){
+      return res.status(404).json({
+        error : "cant find the content or unauthorized request"
+      })
+    }
+
+    console.log("content is deleted : " + content) ;
+
+    await contentModel.deleteOne({
+      _id : new Types.ObjectId(id) ,
+      email 
+    })
+
+    return res.status(200).json({
+      message : "successfully deleted it"
+    })
+
+
+
+
   });
 
   app.post("/brain/share", (req: Request, res: Response) => {
