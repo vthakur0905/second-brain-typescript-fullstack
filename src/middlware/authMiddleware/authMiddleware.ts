@@ -9,7 +9,8 @@ const authMiddleware = (req: Request, res:Response, next:NextFunction):void => {
         const token = req.cookies.token ;
          
         if(!token) {
-            res.status(401).json({
+            //@ts-expect-error
+            return res.status(401).json({
                 message : "unauthorized no token"
             }) ;
         }
@@ -18,13 +19,16 @@ const authMiddleware = (req: Request, res:Response, next:NextFunction):void => {
         const username = decoded.email ;
         console.log("username :" + username) ;
         (req as any).email = decoded.email ;
-        console.log("email in authMiddleware " + decoded.email) ; 
+
+        console.log("email in authMiddleware " + (req as any).email) ; 
         next() ;
+        
 
     }
     catch(Err) {
         console.error(Err) ;
-        res.status(401).json({
+        //@ts-expect-error
+        return res.status(401).json({
             message : "unauthorized"
         })
     }

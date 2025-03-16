@@ -1,4 +1,5 @@
 import mongoose, { MongooseError } from "mongoose";
+import { string } from "zod";
 
 
 const { Schema, Document } = mongoose;
@@ -29,15 +30,10 @@ const contentSchema = new Schema({
   title: { type: String, required: true },
   tags: [
     {
-      type: Schema.Types.ObjectId,
-      ref: "Tag",
-    },
+      type: String
+    }
   ],
-  userId: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
+  email : {type : String}
 });
 
 

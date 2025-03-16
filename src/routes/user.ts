@@ -1,5 +1,5 @@
 import express, { Application, Router, Request, Response, NextFunction } from "express";
-import { userModel } from "../database/db";
+import { contentModel, userModel } from "../database/db";
 import { signupValidation } from "../middlware/validationMiddleware/signupValidation";
 import { ZodError } from "zod";
 import bcrypt from "bcrypt";
@@ -131,33 +131,44 @@ function userRoutes(app: Application) {
   });
 
   app.post("/content", authMiddleware, async (req: Request, res: Response): Promise<any> => {
-      try {
-        // const validatedData = contentValidation.parse(req.body);
-        // const { link, type, title, tags } = validatedData;
-        const username = (req as any).username;
+    
+    try {
+      console.log("in content out of try");
+    const email = (req as any).email;
+    console.log("Email outside try:", email);
+    
+    const validatedData = contentValidation.parse(req.body) ;
 
-        if (!username) {
-          return res.status(401).json({
-            message : "missing username"
-          })
-        }
-        console.log("username :" + username);
+    const {link, type, title, tags} = validatedData ;
 
-        return res.json({
-          message: "wow",
-        });
-      } catch (Err) {
-        console.error((Err as any).message) ;
-        console.log("some error occurred");
-        res.status(401).json({
-          message: "some error",
-        });
+    await contentModel.create({
+      link : link, 
+      type : type ,
+      title : title, 
+      tags : tags,
+      email : email 
+    })
+
+    res.status(200).json({
+      message : "successfully created"
+    })
+    }
+    catch(error : any){
+      console.error("error in content route : " + error) ;
+
+      if (error.name == "ZodError"){
+        return res.status(400).json({
+          error : "validation error" ,
+          details : error.errors
+        }) ;
       }
     }
-  );
+    
+});
 
   app.get("/content", authMiddleware, (req: Request, res: Response) => {
-    res.send("get all content route after log in");
+
+  
   });
 
   app.delete("/content", (req: Request, res: Response) => {
