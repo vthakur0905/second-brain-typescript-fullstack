@@ -166,9 +166,35 @@ function userRoutes(app: Application) {
     
 });
 
-  app.get("/content", authMiddleware, (req: Request, res: Response) => {
+  app.get("/content", authMiddleware, async (req: Request, res: Response)  :Promise<any> => {
 
-  
+    try {
+      const email = (req as any).email ;
+
+    if(!email) {
+      return res.status(401).json({
+        messgae : "email not found. Unauthorized"
+      })
+    }
+
+    // console.log(email + "email in content") ;
+
+    const contents = await contentModel.find({email}) ;
+
+    res.status(200).json({
+      message : "successfully retreived content" ,
+      data : contents 
+    })
+    }catch(err : any){
+      console.error("error in retreiving content : ", err) ;
+
+      return res.status(500).json({
+        error : "internal server error",
+        details : err.message
+      })
+    }
+    
+    
   });
 
   app.delete("/content", (req: Request, res: Response) => {
